@@ -1,0 +1,113 @@
+============================================================
+SMOKE TEST: Pre-submission Diagnostics
+============================================================
+
+[ENV] Model class: Qwen2ForCausalLM
+[ENV] attn_implementation: flex_attention
+[ENV] Model dtype: torch.float16
+[ENV] Device: cuda:0
+[ENV] EOS token IDs: [151645]
+[ENV] Batch size: 4
+[ENV] max_new_tokens: 768
+
+*** WARNING: attn_implementation = "flex_attention", expected "sdpa" ***
+    Inference will be slow. Fix Cell 17.
+
+────────────────────────────────────────────────────────────
+Running 3 test prompts (single mode)...
+
+/usr/local/lib/python3.12/dist-packages/transformers/modeling_attn_mask_utils.py:71: FutureWarning: The attention mask API under `transformers.modeling_attn_mask_utils` (`AttentionMaskConverter`) is deprecated and will be removed in Transformers v5.10. Please use the new API in `transformers.masking_utils`.
+  warnings.warn(DEPRECATION_MESSAGE, FutureWarning)
+/usr/local/lib/python3.12/dist-packages/transformers/modeling_attn_mask_utils.py:281: FutureWarning: The attention mask API under `transformers.modeling_attn_mask_utils` (`AttentionMaskConverter`) is deprecated and will be removed in Transformers v5.10. Please use the new API in `transformers.masking_utils`.
+  warnings.warn(DEPRECATION_MESSAGE, FutureWarning)
+/usr/local/lib/python3.12/dist-packages/transformers/modeling_attn_mask_utils.py:71: FutureWarning: The attention mask API under `transformers.modeling_attn_mask_utils` (`AttentionMaskConverter`) is deprecated and will be removed in Transformers v5.10. Please use the new API in `transformers.masking_utils`.
+  warnings.warn(DEPRECATION_MESSAGE, FutureWarning)
+/usr/local/lib/python3.12/dist-packages/transformers/modeling_attn_mask_utils.py:281: FutureWarning: The attention mask API under `transformers.modeling_attn_mask_utils` (`AttentionMaskConverter`) is deprecated and will be removed in Transformers v5.10. Please use the new API in `transformers.masking_utils`.
+  warnings.warn(DEPRECATION_MESSAGE, FutureWarning)
+---------------------------------------------------------------------------
+RuntimeError                              Traceback (most recent call last)
+/tmp/ipykernel_55/3230170741.py in <cell line: 0>()
+     42 for p in test_prompts:
+     43     t1 = time.time()
+---> 44     svg, status = generate_svg(p)
+     45     elapsed = time.time() - t1
+     46     results.append((p, svg, status, elapsed))
+
+/tmp/ipykernel_55/765786573.py in generate_svg(prompt)
+    100     inputs = tokenizer(chat, return_tensors='pt').to(model.device)
+    101     with torch.no_grad():
+--> 102         out = model.generate(**inputs, **GENERATE_KWARGS)
+    103     gen_ids = out[0][inputs['input_ids'].shape[-1]:]
+    104     decoded = tokenizer.decode(gen_ids, skip_special_tokens=True)
+
+/usr/local/lib/python3.12/dist-packages/peft/peft_model.py in generate(self, *args, **kwargs)
+   2046                 with self._enable_peft_forward_hooks(*args, **kwargs):
+   2047                     kwargs = {k: v for k, v in kwargs.items() if k not in self.special_peft_forward_args}
+-> 2048                     outputs = self.base_model.generate(*args, **kwargs)
+   2049             else:
+   2050                 outputs = self.base_model.generate(**kwargs)
+
+/usr/local/lib/python3.12/dist-packages/unsloth/models/llama.py in unsloth_fast_generate(self, *args, **kwargs)
+   2126         torch.autocast(device_type = DEVICE_TYPE_TORCH, dtype = dtype),
+   2127     ):
+-> 2128         output = self._old_generate(*args, **kwargs)
+   2129 
+   2130     # Return accelerate back
+
+/usr/local/lib/python3.12/dist-packages/torch/utils/_contextlib.py in decorate_context(*args, **kwargs)
+    122         # pyrefly: ignore [bad-context-manager]
+    123         with ctx_factory():
+--> 124             return func(*args, **kwargs)
+    125 
+    126     return decorate_context
+
+/usr/local/lib/python3.12/dist-packages/transformers/generation/utils.py in generate(self, inputs, generation_config, logits_processor, stopping_criteria, prefix_allowed_tokens_fn, synced_gpus, assistant_model, streamer, negative_prompt_ids, negative_prompt_attention_mask, custom_generate, **kwargs)
+   2533 
+   2534         # 9. Call generation mode
+-> 2535         result = decoding_method(
+   2536             self,
+   2537             input_ids,
+
+/usr/local/lib/python3.12/dist-packages/transformers/generation/utils.py in _sample(self, input_ids, logits_processor, stopping_criteria, generation_config, synced_gpus, streamer, **model_kwargs)
+   2740                 )
+   2741                 with self._optimize_model_for_decode():
+-> 2742                     outputs = model_forward(**model_inputs, return_dict=True)
+   2743             prefill_consumed = True
+   2744             model_kwargs = self._update_model_kwargs_for_generation(
+
+/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py in _wrapped_call_impl(self, *args, **kwargs)
+   1774             return self._compiled_call_impl(*args, **kwargs)  # type: ignore[misc]
+   1775         else:
+-> 1776             return self._call_impl(*args, **kwargs)
+   1777 
+   1778     # torchrec tests the code consistency with the following code
+
+/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py in _call_impl(self, *args, **kwargs)
+   1785                 or _global_backward_pre_hooks or _global_backward_hooks
+   1786                 or _global_forward_hooks or _global_forward_pre_hooks):
+-> 1787             return forward_call(*args, **kwargs)
+   1788 
+   1789         result = None
+
+/usr/local/lib/python3.12/dist-packages/unsloth/models/llama.py in _CausalLM_fast_forward(self, input_ids, causal_mask, attention_mask, position_ids, past_key_values, inputs_embeds, labels, use_cache, output_attentions, output_hidden_states, return_dict, num_logits_to_keep, logits_to_keep, *args, **kwargs)
+   1444     ) -> Union[Tuple, CausalLMOutputWithPast]:
+   1445         if past_key_values is not None:
+-> 1446             outputs = fast_forward_inference(
+   1447                 self,
+   1448                 input_ids,
+
+/usr/local/lib/python3.12/dist-packages/unsloth/models/llama.py in LlamaModel_fast_forward_inference_custom(self, input_ids, past_key_values, position_ids, attention_mask, **kwargs)
+   1374                 variance = variance,
+   1375             )
+-> 1376             X, present_key_value = attention_fast_forward_inference(
+   1377                 decoder_layer.self_attn,
+   1378                 hidden_states = X,
+
+/usr/local/lib/python3.12/dist-packages/unsloth/models/llama.py in LlamaAttention_fast_forward_inference(self, hidden_states, past_key_value, position_ids, do_prefill, attention_mask, rotary_seq_len)
+    513     RH_Q[:, :, :, h:] = Qn[:, :, :, :h]
+    514     RH_Q[:, :, :, :h].neg_()  # torch.neg(RH_Q[:,:,:,:h], out = RH_Q[:,:,:,:h])
+--> 515     Qn *= cos
+    516     Qn.addcmul_(RH_Q, sin)
+    517 
+
+RuntimeError: output with shape [1, 16, 1, 128] doesn't match the broadcast shape [1, 16, 92, 128]

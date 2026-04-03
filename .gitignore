@@ -1,0 +1,20 @@
+# Mac
+.DS_Store
+__MACOSX/
+
+# IDE
+.idea/
+.vscode/
+
+# Python
+__pycache__/
+*.pyc
+
+# model / checkpoint
+*.pt
+*.bin
+*.safetensors
+checkpoint-*/
+
+# data (可选)
+*.csv
