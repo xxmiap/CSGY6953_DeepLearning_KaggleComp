@@ -138,7 +138,7 @@ baseline-qwen2-5_final.ipynb
 
 Model weights are provided via GitHub Releases:
 
-👉 https://github.com/xxmiap/CSGY6953_DeepLearning_KaggleComp/releases/tag/v1.0-model-weights
+ https://github.com/xxmiap/CSGY6953_DeepLearning_KaggleComp/releases/tag/v1.0-model-weights
 
 ---
 
