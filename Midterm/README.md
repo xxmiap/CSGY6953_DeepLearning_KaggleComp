@@ -66,7 +66,7 @@ eda_output/
 
 ---
 
-## 🚀 Inference
+## Inference
 
 The final model generates SVG code from text prompts.
 
